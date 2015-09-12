@@ -5,7 +5,11 @@ var http = require("http");
 var fs = require("fs");
 var parseString = require('xml2js').parseString;
 
-var conf = {realtime: false};
+// TODO: use these
+var conf = {
+  realtime: false,
+  use_segmented_output: false
+};
 
 
 if(process.argv.length < 3) {
@@ -73,7 +77,6 @@ function select_representation(Media) {
 
 // HTTP get a segment
 function fetch_next_segment(Media, init) {
-
   var segment_file = init ? Media['init'] : Media['media'];
 
   segment_file = segment_file.replace("$RepresentationID$", Media['selected_representation']['$']['id']);
@@ -86,10 +89,20 @@ function fetch_next_segment(Media, init) {
   }
   console.log("Fetching "+input_base+input_dash_base + segment_file)
   http.get(input_base+input_dash_base + segment_file, function (res) {
-    res.pipe(fs.createWriteStream(STORAGE + segment_file));
+    if(conf.use_segmented_output) {
+      res.pipe(fs.createWriteStream(STORAGE + segment_file));
+    }
+    else {
+      if(Media['$']['contentType'] == "audio") {
+        res.pipe(fs.createWriteStream(STORAGE + "presentation_"+Media['selected_representation']['$']['id']+".m4a", {flags:"r+"}));
+      }
+      if(Media['$']['contentType'] == "video") {
+        res.pipe(fs.createWriteStream(STORAGE + "presentation_"+Media['selected_representation']['$']['id']+".m4v",{flags:"r+"}));
+      }
+    }
     if (res.statusCode == 200) {
       res.on('end', function () {
-        //fetch_next_segment(Media, false);
+        fetch_next_segment(Media, false);
       });
     } else {
       console.log("Got status code " + res.statusCode + " Stopping..");
