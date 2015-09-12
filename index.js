@@ -90,17 +90,23 @@ function fetch_next_segment(Media, init) {
   console.log("Fetching "+input_base+input_dash_base + segment_file)
   http.get(input_base+input_dash_base + segment_file, function (res) {
     if(conf.use_segmented_output) {
-      res.pipe(fs.createWriteStream(STORAGE + segment_file));
+      Media['outStream'] = fs.createWriteStream(STORAGE + segment_file);
     }
     else {
-      if(Media['$']['contentType'] == "audio") {
-        res.pipe(fs.createWriteStream(STORAGE + "presentation_"+Media['selected_representation']['$']['id']+".m4a", {flags:"r+"}));
+      if(!Media['outStream']) {
+        if (Media['$']['contentType'] == "audio") {
+          Media['outStream'] = fs.createWriteStream(STORAGE + "presentation_" + Media['selected_representation']['$']['id'] + ".m4a");
+        }
+        if (Media['$']['contentType'] == "video") {
+          Media['outStream'] = fs.createWriteStream(STORAGE + "presentation_" + Media['selected_representation']['$']['id'] + ".m4v");
+        }
       }
-      if(Media['$']['contentType'] == "video") {
-        res.pipe(fs.createWriteStream(STORAGE + "presentation_"+Media['selected_representation']['$']['id']+".m4v",{flags:"r+"}));
-      }
+      //res.pipe(Media['outStream']);
     }
     if (res.statusCode == 200) {
+      res.on('data', function (chunk) {
+        Media['outStream'].write(chunk);
+      });
       res.on('end', function () {
         fetch_next_segment(Media, false);
       });
