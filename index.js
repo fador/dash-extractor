@@ -68,8 +68,8 @@ function select_representation(Media) {
     var value = Media['Representation'][key];
     var bandwidth = value['$']['bandwidth'];
 
-    if(bandwidth > best_bandwidth) {
-      best_bandwidth = bandwidth;
+    if(parseInt(bandwidth) > best_bandwidth) {
+      best_bandwidth = parseInt(bandwidth);
       Media['selected_representation'] = value;
     }
   }
