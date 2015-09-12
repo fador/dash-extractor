@@ -104,7 +104,7 @@ function xml_parse(data) {
       process.exit();
     }
     //console.log(util.inspect(result, false, null));
-    //try {
+    try {
       var Period = result['MPD']['Period'];
       input_dash_base = Period[0]['BaseURL'][0];
       var adaptationSets = Period[0]['AdaptationSet'];
@@ -148,10 +148,10 @@ function xml_parse(data) {
       fetch_next_segment(Audio, true);
 
 
-    /*}      catch(e) {
+    } catch(e) {
       console.log("Invalid MPD data while parsing");
       process.exit();
-    } */
+    }
     //console.dir(result);
   });
 }
