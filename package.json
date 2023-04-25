@@ -4,7 +4,7 @@
   "description": "MPEG-DASH stream extractor from MPD",
   "main": "index.js",
   "dependencies": {
-    "xml2js": "^0.4.12"
+    "xml2js": "^0.5.0"
   },
   "devDependencies": {},
   "scripts": {
